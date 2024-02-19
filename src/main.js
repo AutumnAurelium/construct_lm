@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -9,6 +9,10 @@ const createWindow = () => {
             contextIsolation: false
         }
     });
+
+    ipcMain.on("getCompletion", event => {
+        event.reply("getCompletion", {"role": "assistant", "content": "Test"})
+    })
 
     win.menuBarVisible = false;
 

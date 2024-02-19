@@ -5,6 +5,8 @@ let messages = [
 
 ]
 
+let { ipcRenderer } = require("electron");
+
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -43,20 +45,19 @@ function addMessage(msg) {
 }
 
 async function getCompletion(messages) {
-    const response = await fetch("/api/chat/completion", {
-        method: "POST",
-        cache: "no-cache",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            tools: [],
-            messages: messages
-        })
-    });
-
-    return await response.json();
+    ipcRenderer.send("getCompletion", messages);
 }
+
+ipcRenderer.on("getCompletion", (event, message) => {
+    messages.push(message);
+    addMessage(message);
+
+    lockInput = false;
+    let textarea = $("#messageInput");
+    textarea.prop("disabled", false);
+    textarea.focus();
+    textarea.prop("placeholder", "");
+});
 
 $(document).ready(() => {
     $("#systemInput").val(localStorage.getItem("system"));
@@ -93,15 +94,7 @@ $(document).ready(() => {
 
                 // fetch from local API
                 getCompletion(messages).then(response => {
-                    response.forEach((msg) => {
-                        messages.push(msg)
-                        console.log(msg);
-                        addMessage(msg);
-                    });
-                    lockInput = false;
-                    textarea.prop("disabled", false);
-                    textarea.focus();
-                    textarea.prop("placeholder", "");
+
                 }).catch(error => {
                     textarea.prop("placeholder", "API error. Please retry. (" + error + ")");
                     throw error;
