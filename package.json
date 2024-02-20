@@ -17,6 +17,7 @@
     "font-awesome": "^4.7.0",
     "jquery": "^3.7.1",
     "jquery-autosize": "^1.18.18",
+    "openai": "^4.28.0",
     "scss": "^0.2.4"
   }
 }
