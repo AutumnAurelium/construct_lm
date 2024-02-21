@@ -75,6 +75,7 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+      nodeIntegration: true,
     },
   });
 
@@ -121,7 +122,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-let config = {
+// eslint-disable-next-line import/prefer-default-export, import/no-mutable-exports
+export let config = {
   models: ['gpt-3.5-turbo', 'gpt-4-0125-preview'],
   standard_model: 0,
   upgrade_model: 1,

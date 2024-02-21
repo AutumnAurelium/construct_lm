@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = "getCompletion";
+export type Channels = 'getCompletion';
 
 const electronHandler = {
   ipcRenderer: {
@@ -24,6 +24,14 @@ const electronHandler = {
   },
 };
 
+const configHandler = {
+  getModels(): string[] {
+    return ['a', 'b'];
+  },
+};
+
 contextBridge.exposeInMainWorld('electron', electronHandler);
+contextBridge.exposeInMainWorld('config', configHandler);
 
 export type ElectronHandler = typeof electronHandler;
+export type ConfigHandler = typeof configHandler;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, Select } from '@chakra-ui/react';
 import { Message } from './MessagesPane';
 import { ResizingTextarea } from '../Util';
 
@@ -68,13 +68,24 @@ export function MessageInput(attr: {
     }
   }
 
+  console.log(window.electron);
+
+  const models = window.config.getModels();
+
   return (
     <Flex>
-      <Box w="100%">
+      <Box w="90%">
         <ResizingTextarea
           placeholder={isWaiting ? 'Thinking...' : 'Type here...'}
           onKeyDown={keyDown}
         />
+      </Box>
+      <Box w="10%">
+        <Select placeholder="Model" defaultValue={models[0]}>
+          {models.map((model) => {
+            return <option value={model}>{model}</option>;
+          })}
+        </Select>
       </Box>
     </Flex>
   );
