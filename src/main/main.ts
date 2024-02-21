@@ -12,11 +12,11 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
 import { OpenAI } from 'openai';
 import fs from 'fs';
 import assert from 'assert';
+import { resolveHtmlPath } from './util';
+import MenuBuilder from './menu';
 
 class AppUpdater {
   constructor() {
@@ -122,80 +122,96 @@ app.on('window-all-closed', () => {
 });
 
 let config = {
-  "models": ["gpt-3.5-turbo", "gpt-4-0125-preview"],
-  "standard_model": 0,
-  "upgrade_model": 1,
-  "files_dir": "files/",
-  "save_dir": "saved/",
-  "api_key": ""
+  models: ['gpt-3.5-turbo', 'gpt-4-0125-preview'],
+  standard_model: 0,
+  upgrade_model: 1,
+  files_dir: 'files/',
+  save_dir: 'saved/',
+  api_key: '',
 };
 
 const openai = new OpenAI({
-  apiKey: ""
+  apiKey: '',
 });
 
-//@ts-ignore
+// @ts-ignore
 const timeout = (prom, time) => {
   let timer: any;
   return Promise.race([
     prom,
-    new Promise((_r, rej) => timer = setTimeout(rej, time))
+    new Promise((_resolve, reject) => {
+      timer = setTimeout(reject, time);
+      // eslint-disable-next-line no-promise-executor-return
+      return timer;
+    }),
   ]).finally(() => clearTimeout(timer));
-}
+};
 
-ipcMain.on("getCompletion", (event, messages, temperature) => {
+ipcMain.on('getCompletion', (event, messages, temperature) => {
   console.log(messages);
-  timeout(openai.chat.completions.create({
-    messages: messages,
-    temperature: temperature,
-    model: "gpt-3.5-turbo"
-  }), 10000).catch(err => {
-    event.reply("getCompletion", {"role": "assistant", "content": "[OpenAI took too long.]"});
-    return;
-  }).then((completion) => {
-    console.log(completion.choices[0].message);
-    event.reply("getCompletion", completion.choices[0].message);
-  });
+  timeout(
+    openai.chat.completions.create({
+      messages,
+      temperature,
+      model: 'gpt-3.5-turbo',
+    }),
+    10000,
+  )
+    .then((completion) => {
+      console.log(completion.choices[0].message);
+      event.reply('getCompletion', completion.choices[0].message);
+    })
+    .catch(() => {
+      event.reply('getCompletion', {
+        role: 'assistant',
+        content: '[OpenAI took too long.]',
+      });
+    });
 });
 
 // This sucks and I wish I could validate against a schema.
 function validateConfig() {
   try {
-    for (let model of config.models) {
-      assert(model.startsWith("gpt"));
-    }
+    config.models.forEach((model) => {
+      assert(model.startsWith('gpt'));
+    });
   } catch {
-    return "Model list";
+    return 'Model list';
   }
 
   try {
-    assert(config.standard_model >= 0 && config.standard_model < config.models.length);
+    assert(
+      config.standard_model >= 0 &&
+        config.standard_model < config.models.length,
+    );
   } catch {
-    return "Standard model";
+    return 'Standard model';
   }
 
   try {
-    assert(config.upgrade_model >= 0 && config.upgrade_model < config.models.length);
+    assert(
+      config.upgrade_model >= 0 && config.upgrade_model < config.models.length,
+    );
   } catch {
-    return "Upgrade model";
+    return 'Upgrade model';
   }
 
   try {
     assert(fs.existsSync(config.files_dir));
   } catch {
-    return "Files directory";
+    return 'Files directory';
   }
 
   try {
     assert(fs.existsSync(config.save_dir));
   } catch {
-    return "Saves directory";
+    return 'Saves directory';
   }
 
   try {
-    assert(config.api_key.startsWith("sk-"))
+    assert(config.api_key.startsWith('sk-'));
   } catch {
-    return "API key";
+    return 'API key';
   }
   return undefined;
 }
@@ -205,26 +221,31 @@ app
   .then(() => {
     createWindow();
 
-    if(process.env.REFLEX_WORKING_DIR != null) {
+    if (process.env.REFLEX_WORKING_DIR != null) {
       process.chdir(process.env.REFLEX_WORKING_DIR!);
     }
 
     try {
-      config = JSON.parse(fs.readFileSync("./config.json").toString());
+      config = JSON.parse(fs.readFileSync('./config.json').toString());
     } catch {
-      dialog.showErrorBox("Error reading config.json", "Missing/corrupt config file, using defaults.");
+      dialog.showErrorBox(
+        'Error reading config.json',
+        'Missing/corrupt config file, using defaults.',
+      );
     }
 
-    let valid = validateConfig();
+    const valid = validateConfig();
     if (valid) {
-      dialog.showErrorBox("Error reading config.json: ", valid + " missing/corrupt. Exiting.");
+      dialog.showErrorBox(
+        'Error reading config.json: ',
+        `${valid} missing/corrupt. Exiting.`,
+      );
       console.log(__dirname);
 
       app.quit();
     }
 
     openai.apiKey = config.api_key;
-
 
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
