@@ -37,6 +37,12 @@ const configHandler = {
   getModels(): string[] {
     return config.models;
   },
+  getPromptPrices(): number[] {
+    return config.prompt_prices;
+  },
+  getResponsePrices(): number[] {
+    return config.response_prices;
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

@@ -123,7 +123,7 @@ function ModelSelector() {
 // eslint-disable-next-line import/prefer-default-export
 export function OptionsPane() {
   return (
-    <Flex>
+    <Flex position="sticky">
       <Box w="80%">
         <SystemPromptInput/>
       </Box>

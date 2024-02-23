@@ -1,14 +1,19 @@
 import assert from 'assert';
 import fs from 'fs';
+import { useAtom } from 'jotai';
+import { modelUsageAtom } from '../renderer/state';
 
 // eslint-disable-next-line import/prefer-default-export, import/no-mutable-exports
 export let config = {
   models: ['gpt-3.5-turbo', 'gpt-4-0125-preview'],
   standard_model: 0,
   upgrade_model: 1,
+  prompt_prices: [0.0005, 0.01],
+  response_prices: [0.0015, 0.03],
   files_dir: 'files/',
   save_dir: 'saved/',
   api_key: '',
+  openai_timeout: 10000,
 };
 
 export type Config = typeof config;
@@ -57,6 +62,20 @@ export function validateConfig() {
   } catch {
     return 'API key';
   }
+
+  try {
+    assert(config.openai_timeout > 100);
+  } catch {
+    return 'OpenAI timeout';
+  }
+
+  try {
+    assert(config.prompt_prices.length === config.models.length);
+    assert(config.response_prices.length === config.models.length);
+  } catch {
+    return 'Pricing info';
+  }
+
   return undefined;
 }
 

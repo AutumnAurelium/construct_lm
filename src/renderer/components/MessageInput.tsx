@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react';
-import { Box, Flex, Select } from '@chakra-ui/react';
+import { Box, Code, Flex, Select, VStack } from '@chakra-ui/react';
 import { useAtom } from 'jotai';
-import { Message, activeConversationAtom, modelChoiceAtom, systemPromptAtom, temperatureAtom } from '../state';
+import { Message, activeConversationAtom, modelChoiceAtom, modelUsageAtom, systemPromptAtom, temperatureAtom } from '../state';
 import { ResizingTextarea } from '../Util';
 import { messagesAtom } from '../state';
+import { Completion } from '../../main/ipc';
 
 const React = require('react');
+
+function PriceInfo() {
+  const [priceInfo, setPriceInfo] = useAtom(modelUsageAtom);
+
+  let response_prices = window.config.getResponsePrices();
+  let prompt_prices = window.config.getPromptPrices();
+
+  let total = 0;
+  priceInfo.forEach((info, index) => {
+    total += response_prices[index]*(info.tokens_response/1000);
+    total += prompt_prices[index]*(info.tokens_prompt/1000);
+  });
+
+  return (
+    <Box>
+      <p>You have spent {(total > 0.0001) ? `$${total.toFixed(3)}` : '<$0.001'}</p>
+    </Box>
+  );
+}
 
 export function MessageInput() {
   let [messages, setMessages] = useAtom(messagesAtom);
@@ -13,14 +33,20 @@ export function MessageInput() {
   let [systemPrompt] = useAtom(systemPromptAtom);
   let [temperature] = useAtom(temperatureAtom);
   let [model, setModel] = useAtom(modelChoiceAtom);
+  const [priceInfo, setPriceInfo] = useAtom(modelUsageAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
   useEffect(() => {
     return window.electron.ipcRenderer.on(
       'getCompletion',
       // @ts-ignore
-      (completion: Message) => {
-        setMessages([...messages, completion]);
+      (completion: Completion) => {
+        setMessages([...messages, ...completion.messages]);
+
+        priceInfo[model].tokens_prompt += completion.tokens_prompt;
+        priceInfo[model].tokens_response += completion.tokens_response;
+        setPriceInfo(priceInfo);
+
         setIsWaiting(false);
       },
     );
@@ -63,13 +89,16 @@ export function MessageInput() {
   }
 
   return (
-    <Flex>
-      <Box w="100%">
+    <VStack>
+      <Box w="100%" mb={2}>
         <ResizingTextarea
           placeholder={isWaiting ? 'Thinking...' : 'Type here...'}
           onKeyDown={keyDown}
         />
       </Box>
-    </Flex>
+      <Box mb={2}>
+        <PriceInfo />
+      </Box>
+    </VStack>
   );
 }

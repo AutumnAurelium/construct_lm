@@ -7,6 +7,12 @@ const openai = new OpenAI({
   apiKey: '',
 });
 
+export type Completion = {
+  messages: Message[];
+  tokens_prompt: number;
+  tokens_response: number;
+}
+
 // @ts-ignore
 const timeout = (prom, time) => {
   let timer: any;
@@ -32,17 +38,25 @@ export function setupIPC() {
           temperature,
           model,
         }),
-        10000,
+        config.openai_timeout,
       )
         // eslint-disable-next-line promise/always-return
-        .then((completion) => {
+        .then((completion: OpenAI.Chat.ChatCompletion) => {
           console.log(completion.choices[0].message);
-          event.reply('getCompletion', completion.choices[0].message);
+          event.reply('getCompletion', {
+            messages: [completion.choices[0].message],
+            tokens_prompt: completion.usage!.prompt_tokens,
+            tokens_response: completion.usage!.completion_tokens,
+          } as Completion);
         })
         .catch((e) => {
+          let message = `[OpenAI Error: ${e}]`;
+          if (e === undefined) {
+            message = '[OpenAI Response Took Too Long]';
+          }
           event.reply('getCompletion', {
             role: 'assistant',
-            content: `[OpenAI Error: ]${e}`,
+            content: message,
           });
         });
     },

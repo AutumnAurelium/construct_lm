@@ -4,6 +4,7 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.scss';
 import {
+  Box,
   ChakraProvider,
   defineStyle,
   defineStyleConfig,
