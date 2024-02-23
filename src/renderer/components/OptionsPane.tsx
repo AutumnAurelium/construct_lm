@@ -12,19 +12,18 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { Message } from './MessagesPane';
+import { activeConversationAtom, systemPromptAtom, temperatureAtom } from '../state';
 import { ResizingTextarea } from '../Util';
+import { useAtom } from 'jotai';
+import { messagesAtom } from '../state';
 
-function SystemPromptInput(attr: {
-  sysPrompt: string;
-  setSysPrompt: (prompt: string) => void;
-  activeConversation: boolean;
-}) {
-  const { sysPrompt, setSysPrompt, activeConversation } = attr;
+function SystemPromptInput() {
+  let [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
+  let [activeConversation] = useAtom(activeConversationAtom);
 
   useEffect(() => {
-    if (sysPrompt != null) {
-      localStorage.setItem('systemPrompt', sysPrompt);
+    if (systemPrompt != null) {
+      localStorage.setItem('systemPrompt', systemPrompt);
     }
   });
 
@@ -34,20 +33,17 @@ function SystemPromptInput(attr: {
       placeholder="You are a friendly AI assistant..."
       // eslint-disable-next-line no-undef
       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-        setSysPrompt(e.target.value)
+        setSystemPrompt(e.target.value)
       }
-      value={sysPrompt}
+      value={systemPrompt}
       disabled={activeConversation}
     />
   );
 }
 
-function ButtonCluster(attr: {
-  setMessages: (messages: Message[]) => void;
-  systemPrompt: string;
-  setActiveConversation: (active: boolean) => void;
-}) {
-  const { setMessages, setActiveConversation } = attr;
+function ButtonCluster() {
+  const [, setMessages] = useAtom(messagesAtom);
+  let [,setActiveConversation] = useAtom(activeConversationAtom);
   return (
     <div className="form-group col-sm-2 m-0 pl-0">
       <Button
@@ -65,11 +61,8 @@ function ButtonCluster(attr: {
   );
 }
 
-function TemperatureSlider(attr: {
-  temperature: number;
-  setTemperature: (temp: number) => void;
-}) {
-  const { setTemperature } = attr;
+function TemperatureSlider() {
+  let [,setTemperature] = useAtom(temperatureAtom);
   const labelStyles = {
     mt: '1',
     ml: '-2.5',
@@ -110,46 +103,18 @@ function TemperatureSlider(attr: {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function OptionsPane(attr: {
-  sysPrompt: string;
-  setSysPrompt: (prompt: string) => void;
-  setMessages: (messages: Message[]) => void;
-  activeConversation: boolean;
-  setActiveConversation: (active: boolean) => void;
-  temperature: number;
-  setTemperature: (temp: number) => void;
-}) {
-  const {
-    sysPrompt,
-    setSysPrompt,
-    setMessages,
-    activeConversation,
-    setActiveConversation,
-    temperature,
-    setTemperature,
-  } = attr;
+export function OptionsPane() {
   return (
     <Flex>
       <Box w="80%">
-        <SystemPromptInput
-          sysPrompt={sysPrompt}
-          setSysPrompt={setSysPrompt}
-          activeConversation={activeConversation}
-        />
+        <SystemPromptInput/>
       </Box>
       <Box w="20%">
         <Box margin={2}>
-          <ButtonCluster
-            setMessages={setMessages}
-            systemPrompt={sysPrompt}
-            setActiveConversation={setActiveConversation}
-          />
+          <ButtonCluster/>
         </Box>
         <Box margin={3} ml={6} mr={6}>
-          <TemperatureSlider
-            temperature={temperature}
-            setTemperature={setTemperature}
-          />
+          <TemperatureSlider/>
         </Box>
       </Box>
     </Flex>

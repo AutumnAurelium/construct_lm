@@ -1,22 +1,17 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable consistent-return */
 import { Box, Button, HStack, Icon, VStack } from '@chakra-ui/react';
+import { useAtom } from 'jotai';
 import { marked } from 'marked';
 import { FaUser, FaRobot, FaTrash } from 'react-icons/fa';
-
-export type Message = {
-  role: string;
-  content: string;
-};
+import { Message, activeConversationAtom, messagesAtom } from '../state';
 
 export function MessageBox(attr: {
   message: Message;
-  messages: Message[];
-  setMessages: (msgs: Message[]) => void;
-  setActiveConversation: (active: boolean) => void;
 }) {
-  const { message, setMessages, setActiveConversation } = attr;
-  let { messages } = attr;
+  const { message } = attr;
+  let [messages, setMessages] = useAtom(messagesAtom);
+  let [,setActiveConversation] = useAtom(activeConversationAtom);
 
   const index = messages.indexOf(message);
 
@@ -73,23 +68,15 @@ export function MessageBox(attr: {
   );
 }
 
-export function MessagesPane(attr: {
-  messages: Message[];
-  setMessages: (msgs: Message[]) => void;
-  setActiveConversation: (active: boolean) => void;
-}) {
-  const { messages, setMessages, setActiveConversation } = attr;
+export function MessagesPane() {
+  const [messages] = useAtom(messagesAtom);
+  let [,setActiveConversation] = useAtom(activeConversationAtom);
   return (
     <div id="messages">
       {messages.map((message) => {
         if (message.role !== 'system' && message.content !== '') {
           return (
-            <MessageBox
-              message={message}
-              messages={messages}
-              setMessages={setMessages}
-              setActiveConversation={setActiveConversation}
-            />
+            <MessageBox message={message}/>
           );
         }
       })}

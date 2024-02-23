@@ -163,10 +163,10 @@ ipcMain.on('getCompletion', (event, messages, temperature) => {
       console.log(completion.choices[0].message);
       event.reply('getCompletion', completion.choices[0].message);
     })
-    .catch(() => {
+    .catch((e) => {
       event.reply('getCompletion', {
         role: 'assistant',
-        content: '[OpenAI took too long.]',
+        content: `[OpenAI Error: ]${e}`,
       });
     });
 });

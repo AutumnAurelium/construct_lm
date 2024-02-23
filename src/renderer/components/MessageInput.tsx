@@ -1,36 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Box, Flex, Select } from '@chakra-ui/react';
-import { Message } from './MessagesPane';
+import { useAtom } from 'jotai';
+import { Message, activeConversationAtom, systemPromptAtom, temperatureAtom } from '../state';
 import { ResizingTextarea } from '../Util';
+import { messagesAtom } from '../state';
 
 const React = require('react');
 
-// eslint-disable-next-line import/prefer-default-export
-export function MessageInput(attr: {
-  messages: Message[];
-  addMessages: (msgs: Message[]) => Message[];
-  systemPrompt: string;
-  activeConversation: boolean;
-  setActiveConversation: (active: boolean) => void;
-  temperature: number;
-}) {
-  let { messages } = attr;
-  const {
-    addMessages,
-    systemPrompt,
-    activeConversation,
-    setActiveConversation,
-    temperature,
-  } = attr;
+export function MessageInput() {
+  let [messages, setMessages] = useAtom(messagesAtom);
+  let [activeConversation, setActiveConversation] = useAtom(activeConversationAtom);
+  let [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
+  let [temperature, setTemperature] = useAtom(temperatureAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
   useEffect(() => {
-    // @ts-ignore
     return window.electron.ipcRenderer.on(
       'getCompletion',
       // @ts-ignore
       (completion: Message) => {
-        addMessages([completion]);
+        setMessages([...messages, completion]);
         setIsWaiting(false);
       },
     );
@@ -48,12 +37,15 @@ export function MessageInput(attr: {
           // @ts-ignore
           e.target.value = '';
           if (!activeConversation) {
-            messages = addMessages([
+            messages = [
+              ...messages,
               { role: 'system', content: systemPrompt },
               msg,
-            ]);
+            ];
+            setMessages(messages);
           } else {
-            messages = addMessages([msg]);
+            messages = [...messages, msg];
+            setMessages(messages);
           }
           setActiveConversation(true);
 
@@ -67,8 +59,6 @@ export function MessageInput(attr: {
       }
     }
   }
-
-  console.log(window.electron);
 
   const models = window.config.getModels();
 
