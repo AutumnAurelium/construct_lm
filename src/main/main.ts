@@ -1,4 +1,4 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
+/* eslint global-require: off, no-console: off */
 
 /**
  * This module executes inside of electron's main process. You can start
@@ -9,14 +9,13 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, shell, dialog, ipcMain, ipcRenderer } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { OpenAI } from 'openai';
-import fs from 'fs';
-import assert from 'assert';
+import OpenAI from 'openai';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
+import { config, loadConfig, validateConfig } from './config';
 
 class AppUpdater {
   constructor() {
@@ -122,16 +121,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-// eslint-disable-next-line import/prefer-default-export, import/no-mutable-exports
-export let config = {
-  models: ['gpt-3.5-turbo', 'gpt-4-0125-preview'],
-  standard_model: 0,
-  upgrade_model: 1,
-  files_dir: 'files/',
-  save_dir: 'saved/',
-  api_key: '',
-};
-
 const openai = new OpenAI({
   apiKey: '',
 });
@@ -159,6 +148,7 @@ ipcMain.on('getCompletion', (event, messages, temperature) => {
     }),
     10000,
   )
+    // eslint-disable-next-line promise/always-return
     .then((completion) => {
       console.log(completion.choices[0].message);
       event.reply('getCompletion', completion.choices[0].message);
@@ -171,52 +161,11 @@ ipcMain.on('getCompletion', (event, messages, temperature) => {
     });
 });
 
-// This sucks and I wish I could validate against a schema.
-function validateConfig() {
-  try {
-    config.models.forEach((model) => {
-      assert(model.startsWith('gpt'));
-    });
-  } catch {
-    return 'Model list';
-  }
-
-  try {
-    assert(
-      config.standard_model >= 0 &&
-        config.standard_model < config.models.length,
-    );
-  } catch {
-    return 'Standard model';
-  }
-
-  try {
-    assert(
-      config.upgrade_model >= 0 && config.upgrade_model < config.models.length,
-    );
-  } catch {
-    return 'Upgrade model';
-  }
-
-  try {
-    assert(fs.existsSync(config.files_dir));
-  } catch {
-    return 'Files directory';
-  }
-
-  try {
-    assert(fs.existsSync(config.save_dir));
-  } catch {
-    return 'Saves directory';
-  }
-
-  try {
-    assert(config.api_key.startsWith('sk-'));
-  } catch {
-    return 'API key';
-  }
-  return undefined;
-}
+ipcMain.on('updateConfig', (event) => {
+  const sanitizedConfig = { ...config };
+  sanitizedConfig.api_key = '';
+  event.reply('updateConfig', sanitizedConfig);
+});
 
 app
   .whenReady()
@@ -228,7 +177,7 @@ app
     }
 
     try {
-      config = JSON.parse(fs.readFileSync('./config.json').toString());
+      loadConfig();
     } catch {
       dialog.showErrorBox(
         'Error reading config.json',
@@ -237,6 +186,7 @@ app
     }
 
     const valid = validateConfig();
+    // eslint-disable-next-line promise/always-return
     if (valid) {
       dialog.showErrorBox(
         'Error reading config.json: ',

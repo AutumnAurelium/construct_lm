@@ -70,7 +70,6 @@ export function MessageBox(attr: {
 
 export function MessagesPane() {
   const [messages] = useAtom(messagesAtom);
-  let [,setActiveConversation] = useAtom(activeConversationAtom);
   return (
     <div id="messages">
       {messages.map((message) => {

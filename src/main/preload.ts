@@ -1,6 +1,7 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { Config } from './config';
 
 export type Channels = 'getCompletion';
 
@@ -24,9 +25,17 @@ const electronHandler = {
   },
 };
 
+let config: Config;
+
+ipcRenderer.send('updateConfig');
+
+ipcRenderer.on('updateConfig', (event, newCfg: Config) => {
+  config = newCfg;
+});
+
 const configHandler = {
   getModels(): string[] {
-    return ['a', 'b'];
+    return config.models;
   },
 };
 

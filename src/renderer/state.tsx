@@ -11,3 +11,4 @@ export const systemPromptAtom = atom(
   window.localStorage.getItem('systemPrompt')!,
 );
 export const temperatureAtom = atom(1.0);
+export const modelChoiceAtom = atom(0);

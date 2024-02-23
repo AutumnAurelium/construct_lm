@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Flex,
+  Select,
   Slider,
   SliderFilledTrack,
   SliderMark,
@@ -12,7 +13,7 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { activeConversationAtom, systemPromptAtom, temperatureAtom } from '../state';
+import { activeConversationAtom, modelChoiceAtom, systemPromptAtom, temperatureAtom } from '../state';
 import { ResizingTextarea } from '../Util';
 import { useAtom } from 'jotai';
 import { messagesAtom } from '../state';
@@ -45,7 +46,7 @@ function ButtonCluster() {
   const [, setMessages] = useAtom(messagesAtom);
   let [,setActiveConversation] = useAtom(activeConversationAtom);
   return (
-    <div className="form-group col-sm-2 m-0 pl-0">
+    <Box>
       <Button
         colorScheme="red"
         w="100%"
@@ -57,7 +58,7 @@ function ButtonCluster() {
         <DeleteIcon />
         Reset
       </Button>
-    </div>
+    </Box>
   );
 }
 
@@ -102,6 +103,23 @@ function TemperatureSlider() {
   );
 }
 
+function ModelSelector() {
+  let [model, setModel] = useAtom(modelChoiceAtom);
+
+  const models = window.config.getModels();
+
+  return (<Select
+    value={models[model]}
+    onChange={(event) => {
+            setModel(models.indexOf(event.target.value));
+          }}
+        >
+          {models.map((model) => {
+            return <option value={model}>{model}</option>;
+          })}
+        </Select>);
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function OptionsPane() {
   return (
@@ -110,12 +128,10 @@ export function OptionsPane() {
         <SystemPromptInput/>
       </Box>
       <Box w="20%">
-        <Box margin={2}>
+        <Box>
           <ButtonCluster/>
         </Box>
-        <Box margin={3} ml={6} mr={6}>
-          <TemperatureSlider/>
-        </Box>
+        <ModelSelector />
       </Box>
     </Flex>
   );

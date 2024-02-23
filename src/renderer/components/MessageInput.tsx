@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Flex, Select } from '@chakra-ui/react';
 import { useAtom } from 'jotai';
-import { Message, activeConversationAtom, systemPromptAtom, temperatureAtom } from '../state';
+import { Message, activeConversationAtom, modelChoiceAtom, systemPromptAtom, temperatureAtom } from '../state';
 import { ResizingTextarea } from '../Util';
 import { messagesAtom } from '../state';
 
@@ -10,8 +10,8 @@ const React = require('react');
 export function MessageInput() {
   let [messages, setMessages] = useAtom(messagesAtom);
   let [activeConversation, setActiveConversation] = useAtom(activeConversationAtom);
-  let [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
-  let [temperature, setTemperature] = useAtom(temperatureAtom);
+  let [systemPrompt] = useAtom(systemPromptAtom);
+  let [temperature] = useAtom(temperatureAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
   useEffect(() => {
@@ -60,22 +60,13 @@ export function MessageInput() {
     }
   }
 
-  const models = window.config.getModels();
-
   return (
     <Flex>
-      <Box w="90%">
+      <Box w="100%">
         <ResizingTextarea
           placeholder={isWaiting ? 'Thinking...' : 'Type here...'}
           onKeyDown={keyDown}
         />
-      </Box>
-      <Box w="10%">
-        <Select placeholder="Model" defaultValue={models[0]}>
-          {models.map((model) => {
-            return <option value={model}>{model}</option>;
-          })}
-        </Select>
       </Box>
     </Flex>
   );
