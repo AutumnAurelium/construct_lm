@@ -16,6 +16,7 @@ import OpenAI from 'openai';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
 import { config, loadConfig, validateConfig } from './config';
+import { setupIPC, updateAPIKey } from './ipc';
 
 class AppUpdater {
   constructor() {
@@ -121,52 +122,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-const openai = new OpenAI({
-  apiKey: '',
-});
-
-// @ts-ignore
-const timeout = (prom, time) => {
-  let timer: any;
-  return Promise.race([
-    prom,
-    new Promise((_resolve, reject) => {
-      timer = setTimeout(reject, time);
-      // eslint-disable-next-line no-promise-executor-return
-      return timer;
-    }),
-  ]).finally(() => clearTimeout(timer));
-};
-
-ipcMain.on('getCompletion', (event, messages, temperature) => {
-  console.log(messages);
-  timeout(
-    openai.chat.completions.create({
-      messages,
-      temperature,
-      model: 'gpt-3.5-turbo',
-    }),
-    10000,
-  )
-    // eslint-disable-next-line promise/always-return
-    .then((completion) => {
-      console.log(completion.choices[0].message);
-      event.reply('getCompletion', completion.choices[0].message);
-    })
-    .catch((e) => {
-      event.reply('getCompletion', {
-        role: 'assistant',
-        content: `[OpenAI Error: ]${e}`,
-      });
-    });
-});
-
-ipcMain.on('updateConfig', (event) => {
-  const sanitizedConfig = { ...config };
-  sanitizedConfig.api_key = '';
-  event.reply('updateConfig', sanitizedConfig);
-});
-
 app
   .whenReady()
   .then(() => {
@@ -197,7 +152,8 @@ app
       app.quit();
     }
 
-    openai.apiKey = config.api_key;
+    setupIPC();
+    updateAPIKey(config.api_key);
 
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

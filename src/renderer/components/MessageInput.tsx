@@ -12,6 +12,7 @@ export function MessageInput() {
   let [activeConversation, setActiveConversation] = useAtom(activeConversationAtom);
   let [systemPrompt] = useAtom(systemPromptAtom);
   let [temperature] = useAtom(temperatureAtom);
+  let [model, setModel] = useAtom(modelChoiceAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export function MessageInput() {
             'getCompletion',
             messages,
             temperature,
+            window.config.getModels()[model]
           );
         }
       }

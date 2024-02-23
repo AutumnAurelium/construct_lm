@@ -115,7 +115,7 @@ function ModelSelector() {
           }}
         >
           {models.map((model) => {
-            return <option value={model}>{model}</option>;
+            return <option value={model} key={models.indexOf(model)}>{model}</option>;
           })}
         </Select>);
 }
