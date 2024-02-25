@@ -1,7 +1,5 @@
 import assert from 'assert';
 import fs from 'fs';
-import { useAtom } from 'jotai';
-import { modelUsageAtom } from '../renderer/state';
 
 // eslint-disable-next-line import/prefer-default-export, import/no-mutable-exports
 export let config = {
@@ -13,7 +11,7 @@ export let config = {
   files_dir: 'files/',
   save_dir: 'saved/',
   api_key: '',
-  openai_timeout: 10000,
+  openai_timeout: 100000,
 };
 
 export type Config = typeof config;
