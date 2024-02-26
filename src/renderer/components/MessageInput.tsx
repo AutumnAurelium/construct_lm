@@ -22,7 +22,7 @@ function PriceInfo() {
 
   return (
     <Box>
-      <p>You have spent {(total > 0.0001) ? `$${total.toFixed(3)}` : '<$0.001'}</p>
+      <p>API Cost: {(total > 0.001) ? `$${total.toFixed(3)}` : '<$0.001'}</p>
     </Box>
   );
 }
