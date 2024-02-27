@@ -71,9 +71,10 @@ export function MessagesPane() {
   const [messages] = useAtom(messagesAtom);
   return (
     <div id="messages">
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         if (message.role !== 'system' && message.content !== '') {
-          return <MessageBox message={message} />;
+          // eslint-disable-next-line react/no-array-index-key
+          return <MessageBox message={message} key={index} />;
         }
       })}
     </div>

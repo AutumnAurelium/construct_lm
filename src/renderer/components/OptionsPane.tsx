@@ -1,24 +1,23 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { DeleteIcon } from '@chakra-ui/icons';
+import { DeleteIcon, HamburgerIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Flex,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Select,
-  Slider,
-  SliderFilledTrack,
-  SliderMark,
-  SliderThumb,
-  SliderTrack,
-  Tooltip,
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { useAtom } from 'jotai';
+import { Link } from 'react-router-dom';
 import {
   activeConversationAtom,
   modelChoiceAtom,
   systemPromptAtom,
-  temperatureAtom,
   messagesAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
@@ -51,60 +50,34 @@ function ButtonCluster() {
   const [, setMessages] = useAtom(messagesAtom);
   const [, setActiveConversation] = useAtom(activeConversationAtom);
   return (
-    <Box>
-      <Button
-        colorScheme="red"
-        w="100%"
-        onClick={() => {
-          setActiveConversation(false);
-          setMessages([]);
-        }}
-      >
-        <DeleteIcon />
-        Reset
-      </Button>
-    </Box>
-  );
-}
+    <Flex>
+      <Box w="100%">
+        <Button
+          colorScheme="red"
+          w="100%"
+          onClick={() => {
+            setActiveConversation(false);
+            setMessages([]);
+          }}
+        >
+          <DeleteIcon />
+          Reset
+        </Button>
+      </Box>
 
-function TemperatureSlider() {
-  const [, setTemperature] = useAtom(temperatureAtom);
-  const labelStyles = {
-    mt: '1',
-    ml: '-2.5',
-    fontSize: 'sm',
-  };
-  return (
-    <Slider
-      onChange={(value) => setTemperature(value)}
-      min={0.0}
-      max={2.0}
-      step={0.1}
-    >
-      <SliderMark value={0.0} {...labelStyles}>
-        0.0
-      </SliderMark>
-      <SliderMark value={1.0} {...labelStyles}>
-        1.0
-      </SliderMark>
-      <SliderMark value={2.0} {...labelStyles}>
-        2.0
-      </SliderMark>
-
-      <SliderTrack>
-        <SliderFilledTrack />
-      </SliderTrack>
-      <Tooltip
-        label="Temperature"
-        textAlign="center"
-        bg="blue.500"
-        color="white"
-        mt="-10"
-        ml="-5"
-      >
-        <SliderThumb />
-      </Tooltip>
-    </Slider>
+      <Box>
+        <Menu direction="ltr">
+          <MenuButton as={Button} colorScheme="blue">
+            <HamburgerIcon />
+          </MenuButton>
+          <MenuList>
+            <Link to="/tools">
+              <MenuItem>Tools</MenuItem>
+            </Link>
+          </MenuList>
+        </Menu>
+      </Box>
+    </Flex>
   );
 }
 
@@ -134,16 +107,14 @@ function ModelSelector() {
 // eslint-disable-next-line import/prefer-default-export
 export function OptionsPane() {
   return (
-    <Flex position="sticky">
-      <Box w="80%">
+    <HStack gap={0}>
+      <Box w="80%" m={0}>
         <SystemPromptInput />
       </Box>
-      <Box w="20%">
-        <Box>
-          <ButtonCluster />
-        </Box>
+      <Box w="20%" p={0}>
+        <ButtonCluster />
         <ModelSelector />
       </Box>
-    </Flex>
+    </HStack>
   );
 }

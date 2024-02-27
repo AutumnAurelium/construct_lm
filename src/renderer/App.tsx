@@ -8,45 +8,18 @@ import {
   defineStyle,
   defineStyleConfig,
 } from '@chakra-ui/react';
-import { MessagesPane } from './components/MessagesPane';
-import { MessageInput } from './components/MessageInput';
-import { OptionsPane } from './components/OptionsPane';
-
-function Home() {
-  return (
-    <ChakraProvider>
-      <OptionsPane />
-
-      <MessagesPane />
-
-      <MessageInput />
-    </ChakraProvider>
-  );
-}
+import Home from './Home';
+import ToolsConfiguration from './Tools';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </Router>
+    <ChakraProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/tools" element={<ToolsConfiguration />} />
+        </Routes>
+      </Router>
+    </ChakraProvider>
   );
 }
-
-const outline = defineStyle({
-  background: 'orange.500',
-  color: 'white',
-  fontFamily: 'serif',
-  fontWeight: 'normal',
-
-  // let's also provide dark mode alternatives
-  _dark: {
-    background: 'orange.300',
-    color: 'orange.800',
-  },
-});
-
-export const textareaTheme = defineStyleConfig({
-  variants: { outline },
-});
