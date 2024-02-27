@@ -3,7 +3,7 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { Config } from './config';
 
-export type Channels = 'getCompletion';
+export type Channels = 'getCompletion' | 'setAPIKey';
 
 const electronHandler = {
   ipcRenderer: {
@@ -43,6 +43,13 @@ const configHandler = {
   },
   getResponsePrices(): number[] {
     return config.response_prices;
+  },
+  getAPIKey(): string {
+    return config.api_key;
+  },
+  setAPIKey(key: string) {
+    config.api_key = key;
+    ipcRenderer.send('setAPIKey', key);
   },
 };
 

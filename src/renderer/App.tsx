@@ -6,6 +6,7 @@ import './App.scss';
 import { ChakraProvider } from '@chakra-ui/react';
 import Home from './Home';
 import ToolsConfiguration from './Tools';
+import Settings from './Settings';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/tools" element={<ToolsConfiguration />} />
         </Routes>
       </Router>

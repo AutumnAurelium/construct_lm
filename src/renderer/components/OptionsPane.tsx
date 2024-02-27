@@ -71,6 +71,9 @@ function ButtonCluster() {
             <HamburgerIcon />
           </MenuButton>
           <MenuList>
+            <Link to="/settings">
+              <MenuItem>Settings</MenuItem>
+            </Link>
             <Link to="/tools">
               <MenuItem>Tools</MenuItem>
             </Link>

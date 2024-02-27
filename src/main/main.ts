@@ -46,6 +46,9 @@ if (isDebug) {
   require('electron-debug')();
 }
 
+if (process.env.PORTABLE_EXECUTABLE_DIR)
+  app.setPath('userData', path.join(process.env.PORTABLE_EXECUTABLE_DIR));
+
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
@@ -135,8 +138,6 @@ app
   .then(() => {
     createWindow();
 
-
-
     if (process.env.REFLEX_WORKING_DIR != null) {
       process.chdir(process.env.REFLEX_WORKING_DIR!);
     }
@@ -156,15 +157,12 @@ app
     const valid = validateConfig();
     // eslint-disable-next-line promise/always-return
     if (valid) {
-      if (valid === 'API key default') {
+      if (valid === 'API key') {
         dialog.showMessageBoxSync(mainWindow!, {
           title: 'Error',
-          message:
-            'API key invalid/missing. Please specify your OpenAI API key in config.json.',
+          message: 'API key invalid/missing. Specify it in the settings panel.',
           buttons: ['OK'],
         });
-        app.quit();
-        exit(1);
       } else {
         dialog.showMessageBoxSync({
           title: 'Error',

@@ -55,15 +55,6 @@ export function validateConfig() {
     return 'Saves directory';
   }
 
-  if (!config.api_key) {
-    return 'API key default';
-  }
-  try {
-    assert(config.api_key.startsWith('sk-'));
-  } catch {
-    return 'API key';
-  }
-
   try {
     assert(config.openai_timeout > 100);
   } catch {
@@ -75,6 +66,15 @@ export function validateConfig() {
     assert(config.response_prices.length === config.models.length);
   } catch {
     return 'Pricing info';
+  }
+
+  if (!config.api_key) {
+    return 'API key';
+  }
+  try {
+    assert(config.api_key.startsWith('sk-'));
+  } catch {
+    return 'API key';
   }
 
   return undefined;

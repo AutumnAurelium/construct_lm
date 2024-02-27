@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import OpenAI from 'openai';
-import { config } from './config';
+import { config, saveConfig } from './config';
 import { Message } from '../renderer/state';
 
 const openai = new OpenAI({
@@ -55,8 +55,12 @@ export function setupIPC() {
             message = '[OpenAI Response Took Too Long]';
           }
           event.reply('getCompletion', {
-            role: 'assistant',
-            content: message,
+            messages: [
+              {
+                role: 'assistant',
+                content: message,
+              },
+            ],
           });
         });
     },
@@ -64,13 +68,16 @@ export function setupIPC() {
 }
 
 export function updateConfig() {
-  const sanitizedConfig = { ...config };
-  sanitizedConfig.api_key = '';
-  return sanitizedConfig;
+  return config;
 }
 
 ipcMain.on('updateConfig', (event) => {
   event.reply('updateConfig', updateConfig());
+});
+
+ipcMain.on('setAPIKey', (event, apiKey) => {
+  config.api_key = apiKey;
+  saveConfig();
 });
 
 // eslint-disable-next-line import/prefer-default-export

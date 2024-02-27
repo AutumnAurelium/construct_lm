@@ -51,6 +51,7 @@ export function MessageInput() {
       'getCompletion',
       // @ts-ignore
       (completion: Completion) => {
+        console.log(completion);
         setMessages([...messages, ...completion.messages]);
 
         priceInfo[model].tokens_prompt += completion.tokens_prompt;
@@ -68,12 +69,12 @@ export function MessageInput() {
       if (!e.getModifierState('Shift')) {
         e.preventDefault();
 
-        if (!isWaiting) {
+        if (!isWaiting && window.config.getAPIKey() !== '') {
           // @ts-ignore
           const msg: Message = { role: 'user', content: e.target.value };
           // @ts-ignore
           e.target.value = '';
-          if (!activeConversation) {
+          if (!activeConversation && systemPrompt !== null) {
             messages = [{ role: 'system', content: systemPrompt }];
           }
           if (msg.content !== '') {
@@ -81,6 +82,8 @@ export function MessageInput() {
           }
           setMessages(messages);
           setActiveConversation(true);
+
+          console.log(msg);
 
           setIsWaiting(true);
           window.electron.ipcRenderer.sendMessage(
@@ -98,7 +101,15 @@ export function MessageInput() {
     <VStack>
       <Box w="100%" mb={2}>
         <ResizingTextarea
-          placeholder={isWaiting ? 'Thinking...' : 'Type here...'}
+          placeholder={(() => {
+            if (isWaiting) {
+              return 'Thinking...';
+            }
+            if (window.config.getAPIKey() === '') {
+              return 'Please set your API key.';
+            }
+            return 'Type your message here.';
+          })()}
           onKeyDown={keyDown}
         />
       </Box>
