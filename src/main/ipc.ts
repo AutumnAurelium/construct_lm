@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { ipcMain } from 'electron';
 import OpenAI from 'openai';
 import { config } from './config';
 import { Message } from '../renderer/state';
