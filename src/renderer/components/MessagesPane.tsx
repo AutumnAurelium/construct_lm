@@ -64,6 +64,17 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
             </code>
           );
         },
+        // eslint-disable-next-line react/no-unstable-nested-components
+        a(props) {
+          // eslint-disable-next-line react/prop-types
+          const { children, ...rest } = props;
+          return (
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            <a {...rest} target="_blank">
+              {children}
+            </a>
+          );
+        },
       }}
     >
       {message.content}

@@ -87,6 +87,12 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
+  // Open urls in the user's browser
+  mainWindow!.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
@@ -102,14 +108,10 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  // const menuBuilder = new MenuBuilder(mainWindow);
+  // menuBuilder.buildMenu();
 
-  // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
-    return { action: 'deny' };
-  });
+  mainWindow.menuBarVisible = false;
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
@@ -132,6 +134,8 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+
+
 
     if (process.env.REFLEX_WORKING_DIR != null) {
       process.chdir(process.env.REFLEX_WORKING_DIR!);
