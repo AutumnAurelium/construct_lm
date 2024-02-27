@@ -75,12 +75,13 @@ ipcMain.on('updateConfig', (event) => {
   event.reply('updateConfig', updateConfig());
 });
 
-ipcMain.on('setAPIKey', (event, apiKey) => {
-  config.api_key = apiKey;
-  saveConfig();
-});
-
 // eslint-disable-next-line import/prefer-default-export
 export function updateAPIKey(key: string) {
   openai.apiKey = key;
 }
+
+ipcMain.on('setAPIKey', (event, apiKey) => {
+  config.api_key = apiKey;
+  updateAPIKey(apiKey);
+  saveConfig();
+});
