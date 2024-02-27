@@ -1,4 +1,5 @@
 {
+  "name": "construct_lm",
   "description": "An advanced desktop client for the OpenAI chat models.",
   "keywords": [
     "electron",
@@ -10,13 +11,13 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/AutumnAurelium/reflex_lm",
+  "homepage": "https://github.com/AutumnAurelium/construct_lm",
   "bugs": {
-    "url": "https://github.com/AutumnAurelium/reflex_lm/issues"
+    "url": "https://github.com/AutumnAurelium/construct_lm/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AutumnAurelium/reflex_lm.git"
+    "url": "git+https://github.com/AutumnAurelium/construct_lm.git"
   },
   "license": "MIT",
   "author": {
