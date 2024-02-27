@@ -78,7 +78,7 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
         },
       }}
     >
-      {message.content}
+      {message.content.replaceAll('\\[ ', '$$ ').replaceAll(' \\]', ' $$')}
     </Markdown>
   );
 }
