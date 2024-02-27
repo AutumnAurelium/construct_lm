@@ -11,7 +11,7 @@ export type Completion = {
   messages: Message[];
   tokens_prompt: number;
   tokens_response: number;
-}
+};
 
 // @ts-ignore
 const timeout = (prom, time) => {

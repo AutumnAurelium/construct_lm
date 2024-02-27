@@ -80,3 +80,7 @@ export function validateConfig() {
 export function loadConfig() {
   config = JSON.parse(fs.readFileSync('./config.json').toString());
 }
+
+export function saveConfig() {
+  fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
+}

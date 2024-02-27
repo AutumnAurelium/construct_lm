@@ -170,8 +170,8 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "constructLM",
+    "appId": "me.aurelium.construct_lm",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -226,15 +226,7 @@
     },
     "extraResources": [
       "./assets/**"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
-    }
-  },
-  "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
+    ]
   },
   "devEngines": {
     "node": ">=14.x",

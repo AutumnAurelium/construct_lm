@@ -9,13 +9,12 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, dialog, ipcMain, ipcRenderer } from 'electron';
+import { app, BrowserWindow, shell, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import OpenAI from 'openai';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
-import { config, loadConfig, validateConfig } from './config';
+import { config, loadConfig, saveConfig, validateConfig } from './config';
 import { setupIPC, updateAPIKey } from './ipc';
 
 class AppUpdater {
@@ -136,8 +135,9 @@ app
     } catch {
       dialog.showErrorBox(
         'Error reading config.json',
-        'Missing/corrupt config file, using defaults.',
+        'Missing/corrupt config file, saving defaults.',
       );
+      saveConfig();
     }
 
     const valid = validateConfig();

@@ -4,7 +4,6 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.scss';
 import {
-  Box,
   ChakraProvider,
   defineStyle,
   defineStyleConfig,
@@ -18,9 +17,9 @@ function Home() {
     <ChakraProvider>
       <OptionsPane />
 
-      <MessagesPane/>
+      <MessagesPane />
 
-      <MessageInput/>
+      <MessageInput />
     </ChakraProvider>
   );
 }
