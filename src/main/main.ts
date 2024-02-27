@@ -12,9 +12,16 @@ import path from 'path';
 import { app, BrowserWindow, shell, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { exit } from 'process';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
-import { config, loadConfig, saveConfig, validateConfig } from './config';
+import {
+  config,
+  createDirectories,
+  loadConfig,
+  saveConfig,
+  validateConfig,
+} from './config';
 import { setupIPC, updateAPIKey } from './ipc';
 
 class AppUpdater {
@@ -106,7 +113,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  //new AppUpdater();
 };
 
 /**
@@ -133,23 +140,36 @@ app
     try {
       loadConfig();
     } catch {
-      dialog.showErrorBox(
-        'Error reading config.json',
-        'Missing/corrupt config file, saving defaults.',
-      );
+      dialog.showMessageBoxSync({
+        title: 'Error',
+        message: 'Failed to read config.json, saving defaults.',
+        buttons: ['OK'],
+      });
       saveConfig();
+      createDirectories();
     }
 
     const valid = validateConfig();
     // eslint-disable-next-line promise/always-return
     if (valid) {
-      dialog.showErrorBox(
-        'Error reading config.json: ',
-        `${valid} missing/corrupt. Exiting.`,
-      );
-      console.log(__dirname);
-
-      app.quit();
+      if (valid === 'API key default') {
+        dialog.showMessageBoxSync(mainWindow!, {
+          title: 'Error',
+          message:
+            'API key invalid/missing. Please specify your OpenAI API key in config.json.',
+          buttons: ['OK'],
+        });
+        app.quit();
+        exit(1);
+      } else {
+        dialog.showMessageBoxSync({
+          title: 'Error',
+          message: `${valid} missing/corrupt. Exiting.`,
+          buttons: ['OK'],
+        });
+        app.quit();
+        exit(1);
+      }
     }
 
     setupIPC();

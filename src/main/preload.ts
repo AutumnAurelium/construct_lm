@@ -30,6 +30,7 @@ let config: Config;
 ipcRenderer.send('updateConfig');
 
 ipcRenderer.on('updateConfig', (event, newCfg: Config) => {
+  console.log('got new config');
   config = newCfg;
 });
 

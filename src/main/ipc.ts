@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import OpenAI from 'openai';
 import { config } from './config';
 import { Message } from '../renderer/state';
@@ -63,10 +63,14 @@ export function setupIPC() {
   );
 }
 
-ipcMain.on('updateConfig', (event) => {
+export function updateConfig() {
   const sanitizedConfig = { ...config };
   sanitizedConfig.api_key = '';
-  event.reply('updateConfig', sanitizedConfig);
+  return sanitizedConfig;
+}
+
+ipcMain.on('updateConfig', (event) => {
+  event.reply('updateConfig', updateConfig());
 });
 
 // eslint-disable-next-line import/prefer-default-export

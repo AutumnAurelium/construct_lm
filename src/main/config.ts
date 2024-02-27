@@ -55,6 +55,9 @@ export function validateConfig() {
     return 'Saves directory';
   }
 
+  if (!config.api_key) {
+    return 'API key default';
+  }
   try {
     assert(config.api_key.startsWith('sk-'));
   } catch {
@@ -83,4 +86,9 @@ export function loadConfig() {
 
 export function saveConfig() {
   fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
+}
+
+export function createDirectories() {
+  fs.mkdir(config.files_dir, () => {});
+  fs.mkdir(config.save_dir, () => {});
 }
