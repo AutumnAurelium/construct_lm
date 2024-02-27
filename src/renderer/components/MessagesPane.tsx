@@ -48,6 +48,7 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
           const { children, className, ...rest } = props;
           const match = /language-(\w+)/.exec(className || '');
           return match ? (
+            // @ts-ignore
             <SyntaxHighlighter
               // eslint-disable-next-line react/jsx-props-no-spreading
               {...rest}
