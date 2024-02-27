@@ -1,5 +1,5 @@
-import { forwardRef, Textarea, TextareaProps } from '@chakra-ui/react';
-import ResizeTextarea from "react-textarea-autosize";
+import { forwardRef, Textarea } from '@chakra-ui/react';
+import ResizeTextarea from 'react-textarea-autosize';
 
 export const ResizingTextarea = forwardRef((props, ref) => {
   return (
@@ -11,6 +11,7 @@ export const ResizingTextarea = forwardRef((props, ref) => {
       ref={ref}
       minRows={3}
       as={ResizeTextarea}
+      // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
     />
   );

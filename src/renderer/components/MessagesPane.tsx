@@ -6,12 +6,11 @@ import { marked } from 'marked';
 import { FaUser, FaRobot, FaTrash } from 'react-icons/fa';
 import { Message, activeConversationAtom, messagesAtom } from '../state';
 
-export function MessageBox(attr: {
-  message: Message;
-}) {
+export function MessageBox(attr: { message: Message }) {
   const { message } = attr;
+  // eslint-disable-next-line prefer-const
   let [messages, setMessages] = useAtom(messagesAtom);
-  let [,setActiveConversation] = useAtom(activeConversationAtom);
+  const [, setActiveConversation] = useAtom(activeConversationAtom);
 
   const index = messages.indexOf(message);
 
@@ -74,9 +73,7 @@ export function MessagesPane() {
     <div id="messages">
       {messages.map((message) => {
         if (message.role !== 'system' && message.content !== '') {
-          return (
-            <MessageBox message={message}/>
-          );
+          return <MessageBox message={message} />;
         }
       })}
     </div>

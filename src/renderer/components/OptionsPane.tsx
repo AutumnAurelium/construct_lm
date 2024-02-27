@@ -13,14 +13,19 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { activeConversationAtom, modelChoiceAtom, systemPromptAtom, temperatureAtom } from '../state';
-import { ResizingTextarea } from '../Util';
 import { useAtom } from 'jotai';
-import { messagesAtom } from '../state';
+import {
+  activeConversationAtom,
+  modelChoiceAtom,
+  systemPromptAtom,
+  temperatureAtom,
+  messagesAtom,
+} from '../state';
+import { ResizingTextarea } from '../Util';
 
 function SystemPromptInput() {
-  let [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
-  let [activeConversation] = useAtom(activeConversationAtom);
+  const [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
+  const [activeConversation] = useAtom(activeConversationAtom);
 
   useEffect(() => {
     if (systemPrompt != null) {
@@ -44,7 +49,7 @@ function SystemPromptInput() {
 
 function ButtonCluster() {
   const [, setMessages] = useAtom(messagesAtom);
-  let [,setActiveConversation] = useAtom(activeConversationAtom);
+  const [, setActiveConversation] = useAtom(activeConversationAtom);
   return (
     <Box>
       <Button
@@ -63,7 +68,7 @@ function ButtonCluster() {
 }
 
 function TemperatureSlider() {
-  let [,setTemperature] = useAtom(temperatureAtom);
+  const [, setTemperature] = useAtom(temperatureAtom);
   const labelStyles = {
     mt: '1',
     ml: '-2.5',
@@ -104,20 +109,26 @@ function TemperatureSlider() {
 }
 
 function ModelSelector() {
-  let [model, setModel] = useAtom(modelChoiceAtom);
+  const [model, setModel] = useAtom(modelChoiceAtom);
 
   const models = window.config.getModels();
 
-  return (<Select
-    value={models[model]}
-    onChange={(event) => {
-            setModel(models.indexOf(event.target.value));
-          }}
-        >
-          {models.map((model) => {
-            return <option value={model} key={models.indexOf(model)}>{model}</option>;
-          })}
-        </Select>);
+  return (
+    <Select
+      value={models[model]}
+      onChange={(event) => {
+        setModel(models.indexOf(event.target.value));
+      }}
+    >
+      {models.map((modelName) => {
+        return (
+          <option value={modelName} key={models.indexOf(modelName)}>
+            {modelName}
+          </option>
+        );
+      })}
+    </Select>
+  );
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -125,11 +136,11 @@ export function OptionsPane() {
   return (
     <Flex position="sticky">
       <Box w="80%">
-        <SystemPromptInput/>
+        <SystemPromptInput />
       </Box>
       <Box w="20%">
         <Box>
-          <ButtonCluster/>
+          <ButtonCluster />
         </Box>
         <ModelSelector />
       </Box>

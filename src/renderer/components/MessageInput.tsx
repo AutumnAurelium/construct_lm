@@ -1,38 +1,48 @@
 import { useEffect, useState } from 'react';
-import { Box, Code, Flex, Select, VStack } from '@chakra-ui/react';
+import { Box, VStack } from '@chakra-ui/react';
 import { useAtom } from 'jotai';
-import { Message, activeConversationAtom, modelChoiceAtom, modelUsageAtom, systemPromptAtom, temperatureAtom } from '../state';
+import {
+  Message,
+  activeConversationAtom,
+  modelChoiceAtom,
+  modelUsageAtom,
+  systemPromptAtom,
+  temperatureAtom,
+  messagesAtom,
+} from '../state';
 import { ResizingTextarea } from '../Util';
-import { messagesAtom } from '../state';
 import { Completion } from '../../main/ipc';
 
 const React = require('react');
 
 function PriceInfo() {
-  const [priceInfo, setPriceInfo] = useAtom(modelUsageAtom);
+  const [priceInfo] = useAtom(modelUsageAtom);
 
-  let response_prices = window.config.getResponsePrices();
-  let prompt_prices = window.config.getPromptPrices();
+  const responsePrices = window.config.getResponsePrices();
+  const promptPrices = window.config.getPromptPrices();
 
   let total = 0;
   priceInfo.forEach((info, index) => {
-    total += response_prices[index]*(info.tokens_response/1000);
-    total += prompt_prices[index]*(info.tokens_prompt/1000);
+    total += responsePrices[index] * (info.tokens_response / 1000);
+    total += promptPrices[index] * (info.tokens_prompt / 1000);
   });
 
   return (
     <Box>
-      <p>API Cost: {(total > 0.001) ? `$${total.toFixed(3)}` : '<$0.001'}</p>
+      <p>API Cost: {total > 0.001 ? `$${total.toFixed(3)}` : '<$0.001'}</p>
     </Box>
   );
 }
 
 export function MessageInput() {
+  // eslint-disable-next-line prefer-const
   let [messages, setMessages] = useAtom(messagesAtom);
-  let [activeConversation, setActiveConversation] = useAtom(activeConversationAtom);
-  let [systemPrompt] = useAtom(systemPromptAtom);
-  let [temperature] = useAtom(temperatureAtom);
-  let [model, setModel] = useAtom(modelChoiceAtom);
+  const [activeConversation, setActiveConversation] = useAtom(
+    activeConversationAtom,
+  );
+  const [systemPrompt] = useAtom(systemPromptAtom);
+  const [temperature] = useAtom(temperatureAtom);
+  const [model] = useAtom(modelChoiceAtom);
   const [priceInfo, setPriceInfo] = useAtom(modelUsageAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
@@ -81,7 +91,7 @@ export function MessageInput() {
             'getCompletion',
             messages,
             temperature,
-            window.config.getModels()[model]
+            window.config.getModels()[model],
           );
         }
       }
