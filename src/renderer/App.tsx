@@ -3,11 +3,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.scss';
-import {
-  ChakraProvider,
-  defineStyle,
-  defineStyleConfig,
-} from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import Home from './Home';
 import ToolsConfiguration from './Tools';
 
