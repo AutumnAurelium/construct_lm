@@ -74,16 +74,12 @@ export function MessageInput() {
           // @ts-ignore
           e.target.value = '';
           if (!activeConversation) {
-            messages = [
-              ...messages,
-              { role: 'system', content: systemPrompt },
-              msg,
-            ];
-            setMessages(messages);
-          } else {
-            messages = [...messages, msg];
-            setMessages(messages);
+            messages = [{ role: 'system', content: systemPrompt }];
           }
+          if (msg.content !== '') {
+            messages = [...messages, msg];
+          }
+          setMessages(messages);
           setActiveConversation(true);
 
           setIsWaiting(true);

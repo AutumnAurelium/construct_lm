@@ -5,6 +5,9 @@ constructLM is a (very) work-in-progress frontend for the OpenAI API that seeks 
 ### Roadmap
 
 - [x] Basic chat interface
+- [x] Markdown
+- [x] Syntax highlighting
+- [x] Math
 - [ ] Tools specification pane
 - [ ] Local tool running specification schema
 - [ ] Default tool: read file
