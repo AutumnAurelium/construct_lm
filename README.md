@@ -10,3 +10,6 @@ constructLM is a (very) work-in-progress frontend for the OpenAI API that seeks 
 - [ ] Default tool: read file
 - [ ] Default tool: save file
 - [ ] Default tool: upgrade model
+- [ ] Default tool: OCR
+- [ ] Default tool: extract plain text from document
+- [ ] File drag support
