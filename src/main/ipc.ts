@@ -27,10 +27,12 @@ const timeout = (prom, time) => {
 };
 
 export function setupIPC() {
+  // completion call
   ipcMain.on(
     'getCompletion',
     (event, messages: Message[], temperature: number, model: string) => {
       console.log(messages);
+      // prevents the program from hanging on requests forever. might be better to do this in the renderer.
       timeout(
         openai.chat.completions.create({
           // @ts-ignore
@@ -38,7 +40,7 @@ export function setupIPC() {
           temperature,
           model,
         }),
-        config.openai_timeout,
+        config.openai_timeout, // in milliseconds
       )
         // eslint-disable-next-line promise/always-return
         .then((completion: OpenAI.Chat.ChatCompletion) => {
@@ -54,6 +56,8 @@ export function setupIPC() {
           if (e === undefined) {
             message = '[OpenAI Response Took Too Long]';
           }
+
+          // TODO: add role specifically for these errors
           event.reply('getCompletion', {
             messages: [
               {
@@ -61,25 +65,25 @@ export function setupIPC() {
                 content: message,
               },
             ],
-          });
+            tokens_prompt: 0,
+            tokens_response: 0,
+          } as Completion);
         });
     },
   );
+
+  // returns up-to-date config when render thread asks
+  ipcMain.on('updateConfig', (event) => {
+    event.reply('updateConfig', config);
+  });
 }
 
-export function updateConfig() {
-  return config;
-}
-
-ipcMain.on('updateConfig', (event) => {
-  event.reply('updateConfig', updateConfig());
-});
-
-// eslint-disable-next-line import/prefer-default-export
+// Sets OpenAI API key
 export function updateAPIKey(key: string) {
   openai.apiKey = key;
 }
 
+// handles setAPIKey event
 ipcMain.on('setAPIKey', (event, apiKey) => {
   config.api_key = apiKey;
   updateAPIKey(apiKey);

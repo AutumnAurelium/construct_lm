@@ -16,7 +16,7 @@ export let config = {
 
 export type Config = typeof config;
 
-// This sucks and I wish I could validate against a schema.
+// TODO: replace this horrible function with a schema
 export function validateConfig() {
   try {
     config.models.forEach((model) => {
@@ -89,6 +89,7 @@ export function saveConfig() {
 }
 
 export function createDirectories() {
+  // TODO: more sensible error handling here. hasn't caused a problem so far but probably should be fixed.
   fs.mkdir(config.files_dir, () => {});
   fs.mkdir(config.save_dir, () => {});
 }

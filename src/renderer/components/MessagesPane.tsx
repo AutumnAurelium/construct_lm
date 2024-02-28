@@ -29,6 +29,7 @@ import 'katex/dist/katex.min.css';
 function MessageRender(attr: { message: Message; showRaw: boolean }) {
   const { message, showRaw } = attr;
 
+  // handles raw message viewing
   if (showRaw) {
     return (
       <SyntaxHighlighter language="markdown" PreTag="div" style={materialLight}>
@@ -39,21 +40,21 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
 
   return (
     <Markdown
-      remarkPlugins={[remarkMath]}
-      rehypePlugins={[rehypeKatex]}
+      remarkPlugins={[remarkMath]} // parses the math
+      rehypePlugins={[rehypeKatex]} // renders the math
       components={{
         // eslint-disable-next-line react/no-unstable-nested-components
         code(props) {
           // eslint-disable-next-line react/prop-types
           const { children, className, ...rest } = props;
-          const match = /language-(\w+)/.exec(className || '');
-          return match ? (
+          const langMatch = /language-(\w+)/.exec(className || ''); // matches the language of the codeblock
+          return langMatch ? (
             // @ts-ignore
             <SyntaxHighlighter
               // eslint-disable-next-line react/jsx-props-no-spreading
               {...rest}
               PreTag="div"
-              language={match[1]}
+              language={langMatch[1]}
               style={materialDark}
             >
               {String(children).replace(/\n$/, '')}
@@ -67,6 +68,7 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
         },
         // eslint-disable-next-line react/no-unstable-nested-components
         a(props) {
+          // Make all links try to open a new window. This causes it to open in the user's browser instead of changing the Electron URL.
           // eslint-disable-next-line react/prop-types
           const { children, ...rest } = props;
           return (
@@ -78,7 +80,9 @@ function MessageRender(attr: { message: Message; showRaw: boolean }) {
         },
       }}
     >
-      {message.content.replaceAll('\\[ ', '$$ ').replaceAll(' \\]', ' $$')}
+      {
+        message.content.replaceAll('\\[ ', '$$ ').replaceAll(' \\]', ' $$') // OpenAI's fine tuning likes to use this syntax for math. This might be a bit of a hack, but it makes it more reliable.
+      }
     </Markdown>
   );
 }
@@ -96,12 +100,15 @@ export function MessageBox(attr: { message: Message }) {
     <Box>
       <HStack
         align="top"
-        bg={message.role === 'assistant' ? 'gray.100' : 'white'}
+        bg={
+          message.role === 'assistant' ? 'gray.100' : 'white' // responsible for the alternating-stripes pattern that improves readability
+        }
         p={1}
       >
         <VStack>
           <span>
             {(() => {
+              // Put role icons here.
               if (message.role === 'user') {
                 return <Icon as={FaUser} boxSize={4} />;
               }
@@ -114,6 +121,7 @@ export function MessageBox(attr: { message: Message }) {
         <Box flex={1} overflowX="auto" p={2}>
           <MessageRender message={message} showRaw={showRaw} />
         </Box>
+        {/* Message context menu - maybe separate into new component? */}
         <Menu direction="ltr">
           <MenuButton as={Button} bg="transparent">
             <HamburgerIcon />

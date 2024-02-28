@@ -138,8 +138,9 @@ app
   .then(() => {
     createWindow();
 
-    if (process.env.REFLEX_WORKING_DIR != null) {
-      process.chdir(process.env.REFLEX_WORKING_DIR!);
+    // change CWD based on env variable
+    if (process.env.CONSTRUCT_WORKING_DIR != null) {
+      process.chdir(process.env.CONSTRUCT_WORKING_DIR!);
     }
 
     try {
@@ -158,12 +159,14 @@ app
     // eslint-disable-next-line promise/always-return
     if (valid) {
       if (valid === 'API key') {
+        // if this happens the API key is an empty string.
         dialog.showMessageBoxSync(mainWindow!, {
           title: 'Error',
-          message: 'API key invalid/missing. Specify it in the settings panel.',
+          message: 'API key invalid/missing. Specify it in the settings menu.',
           buttons: ['OK'],
         });
       } else {
+        // non-recoverable error. fewer config options will cause this as they are added to the settings menu
         dialog.showMessageBoxSync({
           title: 'Error',
           message: `${valid} missing/corrupt. Exiting.`,

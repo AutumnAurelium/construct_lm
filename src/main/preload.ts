@@ -47,6 +47,7 @@ const configHandler = {
   getAPIKey(): string {
     return config.api_key;
   },
+  // Don't assume this immediately sets the key on the main thread.
   setAPIKey(key: string) {
     config.api_key = key;
     ipcRenderer.send('setAPIKey', key);

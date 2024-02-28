@@ -12,14 +12,14 @@ export type ModelUsageInfo = {
 
 export type UsageInfo = ModelUsageInfo[];
 
-export const messagesAtom = atom([] as Message[]);
-export const activeConversationAtom = atom(false);
-export const systemPromptAtom = atom(
-  window.localStorage.getItem('systemPrompt')!,
+export const messagesAtom = atom([] as Message[]); // message list
+export const activeConversationAtom = atom(false); // whether there are visible messages
+export const systemPromptAtom = atom(  // system prompt to inject
+  window.localStorage.getItem('systemPrompt')!, // set from localStorage
 );
-export const temperatureAtom = atom(1.0);
-export const modelChoiceAtom = atom(0);
-export const modelUsageAtom = atom(
+export const temperatureAtom = atom(1.0); // currently never set anywhere, may re-add in a submenu later
+export const modelChoiceAtom = atom(0); // currently selected model - this is an index for the `models` var in config.json
+export const modelUsageAtom = atom(  // stores a tally of the token usage per-model this session.
   window.config.getModels().map(() => {
     return {
       tokens_prompt: 0,
