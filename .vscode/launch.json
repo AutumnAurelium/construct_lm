@@ -10,7 +10,7 @@
       "runtimeArgs": ["run", "start"],
       "env": {
         "MAIN_ARGS": "--inspect=5858 --remote-debugging-port=9223",
-        "REFLEX_WORKING_DIR": "run/"
+        "CONSTRUCT_WORKING_DIR": "run/"
       }
     },
     {
