@@ -1,17 +1,11 @@
 import { ipcMain } from 'electron';
 import OpenAI from 'openai';
 import { config, saveConfig } from './config';
-import { Message } from '../renderer/state';
+import { Message, Completion } from '../common/completions';
 
 const openai = new OpenAI({
   apiKey: '',
 });
-
-export type Completion = {
-  messages: Message[];
-  tokens_prompt: number;
-  tokens_response: number;
-};
 
 // @ts-ignore
 const timeout = (prom, time) => {
@@ -47,8 +41,8 @@ export function setupIPC() {
           console.log(completion.choices[0].message);
           event.reply('getCompletion', {
             messages: [completion.choices[0].message],
-            tokens_prompt: completion.usage!.prompt_tokens,
-            tokens_response: completion.usage!.completion_tokens,
+            tokens_input: completion.usage!.prompt_tokens,
+            tokens_output: completion.usage!.completion_tokens,
           } as Completion);
         })
         .catch((e) => {
@@ -65,8 +59,8 @@ export function setupIPC() {
                 content: message,
               },
             ],
-            tokens_prompt: 0,
-            tokens_response: 0,
+            tokens_input: 0,
+            tokens_output: 0,
           } as Completion);
         });
     },

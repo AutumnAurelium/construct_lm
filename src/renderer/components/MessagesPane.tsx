@@ -23,8 +23,9 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { useState } from 'react';
 import { HamburgerIcon } from '@chakra-ui/icons';
-import { Message, activeConversationAtom, messagesAtom } from '../state';
+import { activeConversationAtom, messagesAtom } from '../state';
 import 'katex/dist/katex.min.css';
+import { Message } from '../../common/completions';
 
 function MessageRender(attr: { message: Message; showRaw: boolean }) {
   const { message, showRaw } = attr;

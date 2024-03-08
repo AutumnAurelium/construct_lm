@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import { useAtom } from 'jotai';
 import {
-  Message,
   activeConversationAtom,
   modelChoiceAtom,
   modelUsageAtom,
@@ -11,7 +10,7 @@ import {
   messagesAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
-import { Completion } from '../../main/ipc';
+import { Completion, Message } from '../../common/completions';
 
 const React = require('react');
 
@@ -55,8 +54,8 @@ export function MessageInput() {
         console.log(completion);
         setMessages([...messages, ...completion.messages]);
 
-        priceInfo[model].tokens_prompt += completion.tokens_prompt;
-        priceInfo[model].tokens_response += completion.tokens_response;
+        priceInfo[model].tokens_prompt += completion.tokens_input;
+        priceInfo[model].tokens_response += completion.tokens_output;
         setPriceInfo(priceInfo);
 
         setIsWaiting(false);
