@@ -15,7 +15,37 @@ export class Registry {
   private enabledProviders: string[] = [];
 
   private constructor() {
-    this.providers = [new OpenAIProvider()];
+    this.providers = [
+      new OpenAIProvider(),
+      new OpenAIProvider({
+        friendly_name: 'together.ai',
+        identifier: 'together',
+        base_url: 'https://api.together.xyz/v1',
+        models: [
+          {
+            friendly_name: 'LLaMA-2 Chat (7B)',
+            identifier: 'meta-llama/Llama-2-7b-chat-hf',
+            price_input: 0.2,
+            price_output: 0.2,
+            extensions: [],
+          },
+          {
+            friendly_name: 'LLaMA-2 Chat (13B)',
+            identifier: 'meta-llama/Llama-2-13b-chat-hf',
+            price_input: 0.3,
+            price_output: 0.3,
+            extensions: [],
+          },
+          {
+            friendly_name: 'LLaMA-2 Chat (70B)',
+            identifier: 'meta-llama/Llama-2-70b-chat-hf',
+            price_input: 0.9,
+            price_output: 0.9,
+            extensions: [],
+          },
+        ],
+      }),
+    ];
   }
 
   public static getInstance(): Registry {
@@ -54,6 +84,10 @@ export class Registry {
       return undefined;
     }
     return this.getProviderIgnoreEnabled(id);
+  }
+
+  public getEnabledProviders(): CompletionProvider<any>[] {
+    return this.enabledProviders.map((id) => this.getProvider(id)!);
   }
 }
 

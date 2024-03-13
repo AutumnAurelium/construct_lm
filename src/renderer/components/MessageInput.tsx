@@ -1,23 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import { useAtom } from 'jotai';
 import {
   activeConversationAtom,
   modelChoiceAtom,
-  modelUsageAtom,
   systemPromptAtom,
   temperatureAtom,
   messagesAtom,
+  providerChoiceAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
-import { ConstructCompletion, Message } from '../../common/completions';
+import { Message } from '../../common/completions';
 import { Registry } from '../completions/registry';
 
-const React = require('react');
-
 function PriceInfo() {
-  const [priceInfo] = useAtom(modelUsageAtom);
-
   const total = 999999;
 
   return (
@@ -36,26 +32,13 @@ export function MessageInput() {
   const [systemPrompt] = useAtom(systemPromptAtom);
   const [temperature] = useAtom(temperatureAtom);
   const [model] = useAtom(modelChoiceAtom);
-  const [priceInfo, setPriceInfo] = useAtom(modelUsageAtom);
+  const [provider] = useAtom(providerChoiceAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
-  // Have to use side effects here.
-  useEffect(() => {
-    return window.electron.ipcRenderer.on(
-      'getCompletion',
-      // @ts-ignore
-      (completion: ConstructCompletion) => {
-        console.log(completion);
-        setMessages([...messages, ...completion.messages]);
-
-        priceInfo[model].tokens_prompt += completion.tokens_input;
-        priceInfo[model].tokens_response += completion.tokens_output;
-        setPriceInfo(priceInfo);
-
-        setIsWaiting(false);
-      },
-    );
-  });
+  const activeProvider = Registry.getInstance().getEnabledProviders()[provider];
+  if (!activeProvider) {
+    console.log('tried to access invalid provider');
+  }
 
   // eslint-disable-next-line no-undef
   function keyDown(e: React.KeyboardEvent) {
@@ -63,7 +46,7 @@ export function MessageInput() {
       if (!e.getModifierState('Shift')) {
         e.preventDefault();
 
-        if (!isWaiting) {
+        if (!isWaiting && activeProvider) {
           // @ts-ignore
           const msg: Message = { role: 'user', content: e.target.value };
           // @ts-ignore
@@ -86,13 +69,11 @@ export function MessageInput() {
           console.log(msg);
 
           setIsWaiting(true);
-          const provider = Registry.getInstance().getProvider('openai')!;
+
           // eslint-disable-next-line promise/catch-or-return
-          provider
+          activeProvider
             .getCompletion(
-              Registry.getInstance().getProvider('openai')?.availableModels()[
-                model
-              ].identifier!,
+              activeProvider.availableModels()[model].identifier!,
               messages,
               {
                 temperature,
@@ -119,14 +100,8 @@ export function MessageInput() {
     <VStack>
       <Box w="100%" mb={2}>
         <ResizingTextarea
-          disabled={
-            Registry.getInstance().getProvider('openai')?.userInputState()
-              .disabled
-          } // disable the message box when the API key isn't set
-          placeholder={
-            Registry.getInstance().getProvider('openai')?.userInputState()
-              .message
-          }
+          disabled={activeProvider?.userInputState().disabled} // disable the message box when the API key isn't set
+          placeholder={activeProvider?.userInputState().message}
           onKeyDown={keyDown}
         />
       </Box>

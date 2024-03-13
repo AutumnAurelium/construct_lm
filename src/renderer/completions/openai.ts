@@ -20,7 +20,7 @@ export type OpenAIProviderOptions = {
 };
 
 const openAIConfigSchema = z.object({
-  api_key: z.string().startsWith('sk-'),
+  api_key: z.string(),
 });
 
 type ConfigSchema = {

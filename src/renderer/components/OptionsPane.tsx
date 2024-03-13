@@ -19,6 +19,7 @@ import {
   modelChoiceAtom,
   systemPromptAtom,
   messagesAtom,
+  providerChoiceAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
 import { Registry } from '../completions/registry';
@@ -85,11 +86,53 @@ function ButtonCluster() {
   );
 }
 
+function ProviderSelector() {
+  const [provider, setProvider] = useAtom(providerChoiceAtom);
+  const [,setModel] = useAtom(modelChoiceAtom);
+
+  const providers = Registry.getInstance().getEnabledProviders();
+
+  console.log(providers);
+
+  return (
+    <Select
+      value={providers[provider]?.getProviderInfo().identifier}
+      onChange={(event) => {
+        setProvider(
+          providers.findIndex((sProvider) => {
+            return (
+              sProvider.getProviderInfo().identifier === event.target.value
+            );
+          }),
+        );
+        setModel(0);
+      }}
+    >
+      {providers.map((mProvider) => {
+        return (
+          <option
+            value={mProvider.getProviderInfo().identifier}
+            key={providers.indexOf(mProvider)}
+          >
+            {mProvider.getProviderInfo().friendly_name}
+          </option>
+        );
+      })}
+    </Select>
+  );
+}
+
 function ModelSelector() {
+  const [provider] = useAtom(providerChoiceAtom);
   const [model, setModel] = useAtom(modelChoiceAtom);
 
-  const models =
-    Registry.getInstance().getProvider('openai')?.availableModels() ?? [];
+  let models = Registry.getInstance()
+    .getEnabledProviders()
+    [provider]?.availableModels();
+
+  if (!models) {
+    models = [];
+  }
 
   console.log(models);
 
@@ -119,12 +162,15 @@ function ModelSelector() {
 export function OptionsPane() {
   return (
     <HStack gap={0}>
-      <Box w="80%" m={0}>
+      <Box w="60%" m={0}>
         <SystemPromptInput />
       </Box>
-      <Box w="20%" p={0}>
+      <Box w="40%" p={0}>
         <ButtonCluster />
-        <ModelSelector />
+        <HStack>
+          <ProviderSelector />
+          <ModelSelector />
+        </HStack>
       </Box>
     </HStack>
   );
