@@ -45,6 +45,27 @@ export class Registry {
           },
         ],
       }),
+      new OpenAIProvider({
+        friendly_name: 'OpenRouter',
+        identifier: 'openrouter',
+        base_url: 'https://openrouter.ai/api/v1',
+        models: [
+          {
+            friendly_name: 'Claude 3 Opus',
+            identifier: 'anthropic/claude-3-opus',
+            price_input: 15,
+            price_output: 70,
+            extensions: [],
+          },
+          {
+            friendly_name: 'Claude 3 Opus',
+            identifier: 'anthropic/claude-3-sonnet',
+            price_input: 15,
+            price_output: 70,
+            extensions: [],
+          },
+        ],
+      }),
     ];
   }
 
