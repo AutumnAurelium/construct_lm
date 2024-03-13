@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
-import { Message, Completion } from '../../common/completions';
+import { ZodError, ZodType, ZodTypeDef, z } from 'zod';
+import { Message, ConstructCompletion } from '../../common/completions';
 import {
   CompletionError,
   CompletionOptions,
@@ -10,7 +11,6 @@ import {
   ProviderTrait,
   UserInputState,
 } from './providers';
-import { ZodError, ZodType, ZodTypeDef, z } from 'zod';
 
 export type OpenAIProviderOptions = {
   friendly_name: string;
@@ -34,12 +34,14 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
 
   apiKeyBad: boolean;
 
+  error: ZodError[] | undefined;
+
   constructor(compatible?: OpenAIProviderOptions) {
     super();
 
     this.apiKeyBad = false;
 
-    if (compatible !== null) {
+    if (compatible !== undefined) {
       this.options = compatible!;
     } else {
       this.options = {
@@ -68,6 +70,7 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
     this.openai = new OpenAI({
       baseURL: this.options.base_url,
       apiKey: '',
+      dangerouslyAllowBrowser: true,
     });
   }
 
@@ -83,9 +86,9 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
     model: string,
     history: Message[],
     options: CompletionOptions,
-  ): Promise<CompletionError | Completion> {
+  ): Promise<CompletionError | ConstructCompletion> {
     const historyModified = [] as Message[];
-    if (options.systemPrompt !== undefined) {
+    if (options.systemPrompt) {
       historyModified.push({
         role: 'system',
         content: options.systemPrompt,
@@ -109,7 +112,24 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
         model,
         temperature: options.temperature,
       })
-      .then((oaiCompletion) => {
+      .catch((e) => {
+        return {
+          messages: [
+            {
+              content: `An error occurred. Please try again later.\n${e}`,
+              role: 'assistant',
+            },
+          ],
+          tokens_input: 0,
+          tokens_output: 0,
+        } as ConstructCompletion;
+      })
+      .then((result) => {
+        if ('messages' in result) {
+          // preprocessors are hell, why can't i use instanceof here...
+          return result as ConstructCompletion;
+        }
+        const oaiCompletion = result as OpenAI.Chat.Completions.ChatCompletion;
         const oaiMsg = oaiCompletion.choices[0].message;
         const msg = { role: oaiMsg.role, content: oaiMsg.content } as Message;
 
@@ -117,7 +137,7 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
           messages: [msg],
           tokens_input: oaiCompletion.usage!.prompt_tokens,
           tokens_output: oaiCompletion.usage!.completion_tokens,
-        } as Completion;
+        } as ConstructCompletion;
       });
   }
 
@@ -129,11 +149,14 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
     return openAIConfigSchema;
   }
 
-  acceptConfig(config: ConfigSchema): void {
+  consumeConfig(config: ConfigSchema): void {
     let parsed;
     try {
       parsed = this.configSchema().parse(config);
     } catch (e) {
+      if (e instanceof ZodError) {
+        this.setZodErrors(e.errors);
+      }
       return;
     }
 

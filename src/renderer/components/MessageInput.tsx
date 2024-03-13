@@ -10,21 +10,15 @@ import {
   messagesAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
-import { Completion, Message } from '../../common/completions';
+import { ConstructCompletion, Message } from '../../common/completions';
+import { Registry } from '../completions/registry';
 
 const React = require('react');
 
 function PriceInfo() {
   const [priceInfo] = useAtom(modelUsageAtom);
 
-  const responsePrices = window.config.getResponsePrices();
-  const promptPrices = window.config.getPromptPrices();
-
-  let total = 0;
-  priceInfo.forEach((info, index) => {
-    total += responsePrices[index] * (info.tokens_response / 1000);
-    total += promptPrices[index] * (info.tokens_prompt / 1000);
-  });
+  const total = 999999;
 
   return (
     <Box>
@@ -50,7 +44,7 @@ export function MessageInput() {
     return window.electron.ipcRenderer.on(
       'getCompletion',
       // @ts-ignore
-      (completion: Completion) => {
+      (completion: ConstructCompletion) => {
         console.log(completion);
         setMessages([...messages, ...completion.messages]);
 
@@ -69,7 +63,7 @@ export function MessageInput() {
       if (!e.getModifierState('Shift')) {
         e.preventDefault();
 
-        if (!isWaiting && window.config.getAPIKey() !== '') {
+        if (!isWaiting) {
           // @ts-ignore
           const msg: Message = { role: 'user', content: e.target.value };
           // @ts-ignore
@@ -92,12 +86,30 @@ export function MessageInput() {
           console.log(msg);
 
           setIsWaiting(true);
-          window.electron.ipcRenderer.sendMessage(
-            'getCompletion',
-            messages,
-            temperature,
-            window.config.getModels()[model],
-          );
+          const provider = Registry.getInstance().getProvider('openai')!;
+          // eslint-disable-next-line promise/catch-or-return
+          provider
+            .getCompletion(
+              Registry.getInstance().getProvider('openai')?.availableModels()[
+                model
+              ].identifier!,
+              messages,
+              {
+                temperature,
+                systemPrompt,
+                extensions: [],
+              },
+            )
+            .then((result) => {
+              console.log(result);
+              if ('source' in result) {
+                console.log(result.source);
+                return undefined;
+              }
+              setMessages([...messages, ...result.messages]);
+              setIsWaiting(false);
+              return undefined;
+            });
         }
       }
     }
@@ -107,16 +119,14 @@ export function MessageInput() {
     <VStack>
       <Box w="100%" mb={2}>
         <ResizingTextarea
-          disabled={window.config.getAPIKey() === ''} // disable the message box when the API key isn't set
-          placeholder={(() => {
-            if (isWaiting) {
-              return 'Thinking...';
-            }
-            if (window.config.getAPIKey() === '') {
-              return 'Please set your API key.';
-            }
-            return 'Type your message here.';
-          })()}
+          disabled={
+            Registry.getInstance().getProvider('openai')?.userInputState()
+              .disabled
+          } // disable the message box when the API key isn't set
+          placeholder={
+            Registry.getInstance().getProvider('openai')?.userInputState()
+              .message
+          }
           onKeyDown={keyDown}
         />
       </Box>

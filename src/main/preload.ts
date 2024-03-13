@@ -1,9 +1,8 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { Config } from './config';
 
-export type Channels = 'getCompletion' | 'setAPIKey';
+export type Channels = 'getCompletion' | 'setAPIKey' | 'updateConfig';
 
 const electronHandler = {
   ipcRenderer: {
@@ -25,37 +24,6 @@ const electronHandler = {
   },
 };
 
-let config: Config;
-
-ipcRenderer.send('updateConfig');
-
-ipcRenderer.on('updateConfig', (event, newCfg: Config) => {
-  console.log('got new config');
-  config = newCfg;
-});
-
-const configHandler = {
-  getModels(): string[] {
-    return config.models;
-  },
-  getPromptPrices(): number[] {
-    return config.prompt_prices;
-  },
-  getResponsePrices(): number[] {
-    return config.response_prices;
-  },
-  getAPIKey(): string {
-    return config.api_key;
-  },
-  // Don't assume this immediately sets the key on the main thread.
-  setAPIKey(key: string) {
-    config.api_key = key;
-    ipcRenderer.send('setAPIKey', key);
-  },
-};
-
 contextBridge.exposeInMainWorld('electron', electronHandler);
-contextBridge.exposeInMainWorld('config', configHandler);
 
 export type ElectronHandler = typeof electronHandler;
-export type ConfigHandler = typeof configHandler;

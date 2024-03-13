@@ -9,12 +9,11 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, dialog } from 'electron';
+import { app, BrowserWindow, shell, dialog, ipcRenderer, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { exit } from 'process';
 import { resolveHtmlPath } from './util';
-import MenuBuilder from './menu';
 import {
   config,
   createDirectories,
@@ -143,6 +142,7 @@ app
       process.chdir(process.env.CONSTRUCT_WORKING_DIR!);
     }
 
+    // eslint-disable-next-line promise/always-return
     try {
       loadConfig();
     } catch {
@@ -155,30 +155,7 @@ app
       createDirectories();
     }
 
-    const valid = validateConfig();
-    // eslint-disable-next-line promise/always-return
-    if (valid) {
-      if (valid === 'API key') {
-        // if this happens the API key is an empty string.
-        dialog.showMessageBoxSync(mainWindow!, {
-          title: 'Error',
-          message: 'API key invalid/missing. Specify it in the settings menu.',
-          buttons: ['OK'],
-        });
-      } else {
-        // non-recoverable error. fewer config options will cause this as they are added to the settings menu
-        dialog.showMessageBoxSync({
-          title: 'Error',
-          message: `${valid} missing/corrupt. Exiting.`,
-          buttons: ['OK'],
-        });
-        app.quit();
-        exit(1);
-      }
-    }
-
     setupIPC();
-    updateAPIKey(config.api_key);
 
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

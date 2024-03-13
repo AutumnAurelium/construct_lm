@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { Message } from '../common/completions';
+import { Registry } from './completions/registry';
 
 export type ModelUsageInfo = {
   tokens_prompt: number;
@@ -18,10 +19,12 @@ export const temperatureAtom = atom(1.0); // currently never set anywhere, may r
 export const modelChoiceAtom = atom(0); // currently selected model - this is an index for the `models` var in config.json
 export const modelUsageAtom = atom(
   // stores a tally of the token usage per-model this session.
-  window.config.getModels().map(() => {
-    return {
-      tokens_prompt: 0,
-      tokens_response: 0,
-    };
-  }) as UsageInfo,
+  (Registry.getInstance().getProvider('openai')?.availableModels() ?? []).map(
+    () => {
+      return {
+        tokens_prompt: 0,
+        tokens_response: 0,
+      };
+    },
+  ) as UsageInfo,
 );

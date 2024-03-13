@@ -21,6 +21,7 @@ import {
   messagesAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
+import { Registry } from '../completions/registry';
 
 function SystemPromptInput() {
   const [systemPrompt, setSystemPrompt] = useAtom(systemPromptAtom);
@@ -87,19 +88,26 @@ function ButtonCluster() {
 function ModelSelector() {
   const [model, setModel] = useAtom(modelChoiceAtom);
 
-  const models = window.config.getModels();
+  const models =
+    Registry.getInstance().getProvider('openai')?.availableModels() ?? [];
+
+  console.log(models);
 
   return (
     <Select
-      value={models[model]}
+      value={models[model]?.identifier}
       onChange={(event) => {
-        setModel(models.indexOf(event.target.value));
+        setModel(
+          models.findIndex((sModel) => {
+            return sModel.identifier === event.target.value;
+          }),
+        );
       }}
     >
-      {models.map((modelName) => {
+      {models.map((mModel) => {
         return (
-          <option value={modelName} key={models.indexOf(modelName)}>
-            {modelName}
+          <option value={mModel.identifier} key={models.indexOf(mModel)}>
+            {mModel.friendly_name}
           </option>
         );
       })}

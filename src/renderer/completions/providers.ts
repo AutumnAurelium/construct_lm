@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { Completion, Message } from '../../common/completions';
+import { ZodError, ZodIssue, z } from 'zod';
+import { ConstructCompletion, Message } from '../../common/completions';
 
 export enum ProviderTrait {
   /** Indicates that this provider requires an API key. */
@@ -84,6 +84,8 @@ export type UserInputState = {
 };
 
 export abstract class CompletionProvider<Config> {
+  errors: ZodIssue[] | undefined;
+
   /**
    * @returns A description of the provider's capabilities and basic information.
    */
@@ -99,7 +101,7 @@ export abstract class CompletionProvider<Config> {
     model: string,
     history: Message[],
     options: CompletionOptions,
-  ): Promise<Completion | CompletionError>;
+  ): Promise<ConstructCompletion | CompletionError>;
 
   /**
    * @return A list of all available models from this provider.
@@ -123,16 +125,26 @@ export abstract class CompletionProvider<Config> {
   abstract configSchema(): z.Schema;
 
   /**
-   * Accepts a new configuration.
+   * Consumes a new configuration.
    * @param config The configuration to use. Should conform to configSchema.
    */
-  abstract acceptConfig(config: Config): void;
+  abstract consumeConfig(config: Config): void;
+
+  setZodErrors(errors: ZodIssue[]): void {
+    this.errors = errors;
+  }
 
   /**
    * Use super() for the default, non-errored behavior.
    * @returns The state that the user input box should be in.
    */
   userInputState(): UserInputState {
+    if (this.errors !== undefined) {
+      return {
+        message: `Error in configuration: ${this.errors.map((e) => e.message).join('\n')}`,
+        disabled: true,
+      };
+    }
     return {
       message: 'Type here...',
       disabled: false,
