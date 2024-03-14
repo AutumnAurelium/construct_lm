@@ -88,16 +88,15 @@ function ButtonCluster() {
 
 function ProviderSelector() {
   const [provider, setProvider] = useAtom(providerChoiceAtom);
-  const [,setModel] = useAtom(modelChoiceAtom);
+  const [, setModel] = useAtom(modelChoiceAtom);
 
   const providers = Registry.getInstance().getEnabledProviders();
-
-  console.log(providers);
 
   return (
     <Select
       value={providers[provider]?.getProviderInfo().identifier}
       onChange={(event) => {
+        console.log(providers);
         setProvider(
           providers.findIndex((sProvider) => {
             return (
@@ -106,6 +105,14 @@ function ProviderSelector() {
           }),
         );
         setModel(0);
+
+        window.localStorage.setItem('lastProviderChoice', event.target.value);
+        window.localStorage.setItem(
+          'lastModelChoice',
+          Registry.getInstance()
+            .getProvider(event.target.value)!
+            .availableModels()[0]!.identifier,
+        );
       }}
     >
       {providers.map((mProvider) => {
@@ -134,8 +141,6 @@ function ModelSelector() {
     models = [];
   }
 
-  console.log(models);
-
   return (
     <Select
       value={models[model]?.identifier}
@@ -145,6 +150,8 @@ function ModelSelector() {
             return sModel.identifier === event.target.value;
           }),
         );
+
+        window.localStorage.setItem('lastModelChoice', event.target.value);
       }}
     >
       {models.map((mModel) => {

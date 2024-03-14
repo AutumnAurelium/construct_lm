@@ -8,17 +8,20 @@ import {
   temperatureAtom,
   messagesAtom,
   providerChoiceAtom,
+  apiUsageAtom,
 } from '../state';
 import { ResizingTextarea } from '../Util';
 import { Message } from '../../common/completions';
 import { Registry } from '../completions/registry';
 
 function PriceInfo() {
-  const total = 999999;
+  const [apiUsage] = useAtom(apiUsageAtom);
 
   return (
     <Box>
-      <p>API Cost: {total > 0.001 ? `$${total.toFixed(3)}` : '<$0.001'}</p>
+      <p>
+        API Cost: {apiUsage > 0.001 ? `$${apiUsage.toFixed(3)}` : '<$0.001'}
+      </p>
     </Box>
   );
 }
@@ -33,12 +36,10 @@ export function MessageInput() {
   const [temperature] = useAtom(temperatureAtom);
   const [model] = useAtom(modelChoiceAtom);
   const [provider] = useAtom(providerChoiceAtom);
+  const [apiUsage, setAPIUsage] = useAtom(apiUsageAtom);
   const [isWaiting, setIsWaiting] = useState(() => false);
 
   const activeProvider = Registry.getInstance().getEnabledProviders()[provider];
-  if (!activeProvider) {
-    console.log('tried to access invalid provider');
-  }
 
   // eslint-disable-next-line no-undef
   function keyDown(e: React.KeyboardEvent) {
@@ -88,6 +89,7 @@ export function MessageInput() {
                 return undefined;
               }
               setMessages([...messages, ...result.messages]);
+              setAPIUsage(apiUsage + result.price);
               setIsWaiting(false);
               return undefined;
             });

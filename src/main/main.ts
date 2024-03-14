@@ -9,27 +9,10 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, dialog, ipcRenderer, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
-import { exit } from 'process';
+import { app, BrowserWindow, shell, dialog } from 'electron';
 import { resolveHtmlPath } from './util';
-import {
-  config,
-  createDirectories,
-  loadConfig,
-  saveConfig,
-  validateConfig,
-} from './config';
-import { setupIPC, updateAPIKey } from './ipc';
-
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+import { loadConfig, saveConfig } from './config';
+import { setupIPC } from './ipc';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -152,7 +135,6 @@ app
         buttons: ['OK'],
       });
       saveConfig();
-      createDirectories();
     }
 
     setupIPC();

@@ -133,10 +133,17 @@ export class OpenAIProvider extends CompletionProvider<ConfigSchema> {
         const oaiMsg = oaiCompletion.choices[0].message;
         const msg = { role: oaiMsg.role, content: oaiMsg.content } as Message;
 
+        const tokensInput = oaiCompletion.usage!.prompt_tokens;
+        const tokensOutput = oaiCompletion.usage!.completion_tokens;
+        const modelInfo = this.getModelByID(model)!;
+
         return {
           messages: [msg],
-          tokens_input: oaiCompletion.usage!.prompt_tokens,
-          tokens_output: oaiCompletion.usage!.completion_tokens,
+          tokens_input: tokensInput,
+          tokens_output: tokensOutput,
+          price:
+            (tokensInput / 1000000) * modelInfo.price_input +
+            (tokensOutput / 1000000) * modelInfo.price_output,
         } as ConstructCompletion;
       });
   }

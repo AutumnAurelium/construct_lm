@@ -14,7 +14,10 @@ export class Registry {
 
   private enabledProviders: string[] = [];
 
+  private initialized: boolean;
+
   private constructor() {
+    this.initialized = false;
     this.providers = [
       new OpenAIProvider(),
       new OpenAIProvider({
@@ -51,15 +54,22 @@ export class Registry {
         base_url: 'https://openrouter.ai/api/v1',
         models: [
           {
-            friendly_name: 'Claude 3 Opus',
-            identifier: 'anthropic/claude-3-opus',
-            price_input: 15,
-            price_output: 70,
+            friendly_name: 'Claude 3 Haiku',
+            identifier: 'anthropic/claude-3-haiku',
+            price_input: 0.25,
+            price_output: 1.25,
+            extensions: [],
+          },
+          {
+            friendly_name: 'Claude 3 Sonnet',
+            identifier: 'anthropic/claude-3-sonnet',
+            price_input: 3,
+            price_output: 15,
             extensions: [],
           },
           {
             friendly_name: 'Claude 3 Opus',
-            identifier: 'anthropic/claude-3-sonnet',
+            identifier: 'anthropic/claude-3-opus',
             price_input: 15,
             price_output: 70,
             extensions: [],
@@ -90,6 +100,12 @@ export class Registry {
         }
       });
     }
+
+    this.initialized = true;
+  }
+
+  public isInitialized(): boolean {
+    return this.initialized;
   }
 
   private getProviderIgnoreEnabled(
@@ -111,10 +127,3 @@ export class Registry {
     return this.enabledProviders.map((id) => this.getProvider(id)!);
   }
 }
-
-window.electron.ipcRenderer.sendMessage('updateConfig');
-
-window.electron.ipcRenderer.on('updateConfig', (newCfg: any) => {
-  console.log('got new config');
-  Registry.getInstance().consumeConfig(newCfg);
-});
